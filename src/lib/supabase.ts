@@ -7,12 +7,17 @@ if (!url || !key) {
   console.error('[supabase] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY が未設定')
 }
 
-/** Supabase クライアント（anon + Auth セッション自動管理） */
+/**
+ * Supabase クライアント（bound モード）
+ * - storageKey: アプリごとにユニーク化（localStorage競合・ログアウト問題対策）
+ * - detectSessionInUrl: false（SSO引き継ぎは自前で initSSO() が処理するためOFF）
+ */
 export const supabase = createClient(url!, key!, {
   auth: {
+    storageKey: 'sb-digicollab-cart',
     persistSession: true,
     autoRefreshToken: true,
-    detectSessionInUrl: true, // Magic Link リダイレクトを処理
+    detectSessionInUrl: false,
   },
 })
 

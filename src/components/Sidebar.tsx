@@ -36,10 +36,8 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
     { to: '/reports', label: '売上レポート', icon: <BarChart3 className="w-5 h-5" />, show: true },
   ]
 
-  const handleLogout = async () => {
-    await signOut()
-    window.location.href = '/login'
-  }
+  // signOut がハブへリダイレクトするので、ここでは呼ぶだけ
+  const handleLogout = () => { void signOut() }
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -137,7 +135,7 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
           <button
             onClick={handleLogout}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            title="ログアウト"
+            title="ハブに戻る（ログアウト）"
           >
             <LogOut className="w-4 h-4" />
           </button>
