@@ -69,7 +69,10 @@ export interface FbOrder {
   id: string
   order_number: string | null
   user_id: string
-  product_id: string
+  /** Phase 4-B: booking 決済時は null */
+  product_id: string | null
+  /** Phase 4-B: 予約決済の場合に fb_booking_appointments.id */
+  booking_appointment_id?: string | null
   buyer_email: string
   buyer_name: string | null
   buyer_phone: string | null
@@ -105,7 +108,10 @@ export interface OrderPaidPayload {
   order_id: string
   order_number: string
   user_id: string
-  product_id: string
+  /** Phase 4-B: booking 決済時は null */
+  product_id: string | null
+  /** Phase 4-B: booking 決済時に fb_booking_appointments.id */
+  booking_appointment_id?: string | null
   buyer_email: string
   buyer_name: string | null
   amount_total: number
