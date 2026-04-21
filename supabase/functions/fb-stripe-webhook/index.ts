@@ -98,9 +98,10 @@ Deno.serve(async (req: Request) => {
         const session = event.data.object as {
           id?: string
           payment_intent?: string
-          metadata?: { fb_order_id?: string }
+          metadata?: { fb_order_id?: string; booking_appointment_id?: string }
         }
         const fbOrderId = session.metadata?.fb_order_id
+        const bookingAppointmentId = session.metadata?.booking_appointment_id
         if (!fbOrderId) {
           console.warn(
             `[fb-stripe-webhook] ${eventType} missing fb_order_id metadata`,
@@ -116,6 +117,41 @@ Deno.serve(async (req: Request) => {
         }
         await service.from('fb_orders').update(updates).eq('id', fbOrderId)
         orderIdForNotify = fbOrderId
+
+        // ───── Phase 4-B: booking 決済なら fb_booking_appointments も更新 ─────
+        if (bookingAppointmentId) {
+          const { data: updatedAppt, error: apptErr } = await service
+            .from('fb_booking_appointments')
+            .update({
+              status: 'confirmed',
+              payment_status: 'paid',
+              ...(session.payment_intent
+                ? { stripe_payment_intent_id: session.payment_intent }
+                : {}),
+            })
+            .eq('id', bookingAppointmentId)
+            .in('status', ['pending', 'hold']) // 二重 confirmed 防止 + 既に cancelled/expired は触らない
+            .select('id')
+
+          if (apptErr) {
+            // fb_orders は既に paid 更新済み → アラート相当のログで手動リカバリ
+            console.error(
+              '[fb-stripe-webhook] booking_appointment update failed',
+              {
+                kind: 'phase4b_booking_update_failed',
+                appointment_id: bookingAppointmentId,
+                fb_order_id: fbOrderId,
+                error: apptErr.message,
+              },
+            )
+          } else if (!updatedAppt || updatedAppt.length === 0) {
+            // 既に cancelled/expired な予約に Stripe 決済が成立したレアケース
+            console.warn(
+              '[fb-stripe-webhook] appointment not updated (already processed or invalid state)',
+              { appointment_id: bookingAppointmentId, fb_order_id: fbOrderId },
+            )
+          }
+        }
         break
       }
 
@@ -183,6 +219,7 @@ Deno.serve(async (req: Request) => {
         order_number: order.order_number ?? '',
         user_id: order.user_id,
         product_id: order.product_id,
+        booking_appointment_id: order.booking_appointment_id ?? null,
         buyer_email: order.buyer_email,
         buyer_name: order.buyer_name,
         amount_total: order.amount_total,
