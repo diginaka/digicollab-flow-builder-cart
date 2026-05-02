@@ -98,16 +98,71 @@ Deno.serve(async (req: Request) => {
         const session = event.data.object as {
           id?: string
           payment_intent?: string
-          metadata?: { fb_order_id?: string; booking_appointment_id?: string }
+          metadata?: {
+            fb_order_id?: string
+            booking_appointment_id?: string
+            // timer-configs-upsell-chain パッチ: アップセル子注文の判別
+            is_upsell?: string
+            parent_order_id?: string
+          }
         }
         const fbOrderId = session.metadata?.fb_order_id
         const bookingAppointmentId = session.metadata?.booking_appointment_id
+        const isUpsell = session.metadata?.is_upsell === 'true'
+        const parentOrderId = session.metadata?.parent_order_id
         if (!fbOrderId) {
           console.warn(
             `[fb-stripe-webhook] ${eventType} missing fb_order_id metadata`,
           )
           break
         }
+
+        // ───── timer-configs-upsell-chain パッチ: アップセル早期 return 分岐 ─────
+        // 親注文 (is_upsell=false) の通常副作用 (LP プロビジョニング / booking
+        // 確定 / notifyOrderPaid) はスキップして、子注文の status 更新と
+        // 親 upsell_chain 追記だけ行う。アップセル用メール通知は別タスクで
+        // automation 側に is_upsell 分岐を入れる予定 (申し送り §7)。
+        if (isUpsell) {
+          const upsellUpdates: Record<string, unknown> = {
+            payment_status: 'paid',
+            paid_at: new Date().toISOString(),
+          }
+          if (session.payment_intent) {
+            upsellUpdates.stripe_payment_intent_id = session.payment_intent
+          }
+          await service.from('fb_orders').update(upsellUpdates).eq('id', fbOrderId)
+
+          if (parentOrderId) {
+            const { data: parent } = await service
+              .from('fb_orders')
+              .select('upsell_chain')
+              .eq('id', parentOrderId)
+              .maybeSingle()
+            if (parent) {
+              const existing = Array.isArray(parent.upsell_chain)
+                ? (parent.upsell_chain as Record<string, unknown>[])
+                : []
+              const updatedChain = [
+                ...existing,
+                {
+                  order_id: fbOrderId,
+                  status: 'paid',
+                  at: new Date().toISOString(),
+                },
+              ]
+              await service
+                .from('fb_orders')
+                .update({ upsell_chain: updatedChain })
+                .eq('id', parentOrderId)
+            }
+          }
+
+          console.log(
+            `[fb-stripe-webhook] upsell paid: ${fbOrderId} (parent=${parentOrderId ?? 'unknown'})`,
+          )
+          break
+        }
+
         const updates: Record<string, unknown> = {
           payment_status: 'paid',
           paid_at: new Date().toISOString(),
