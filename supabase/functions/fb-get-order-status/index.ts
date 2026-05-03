@@ -3,7 +3,14 @@
  * 用途: tpl-purchase-complete ページが購入完了情報を取得
  * 認証: なし（verify_jwt=false）
  *
- * 公開可能情報のみ返却（内部ID、他人の情報は除外）
+ * 公開可能情報のみ返却（他人の情報は除外）
+ *
+ * Phase 3-F Pattern A (2026-05-03):
+ *   - レスポンスに fb_orders.id (UUID) を含める
+ *   - 用途: page-renderer が tpl-purchase-complete で
+ *     ?session_id=cs_xxx → fb_orders.id を解決し、
+ *     アップセル LP リンク (?parent_order=<UUID>) を組み立てる
+ *   - UUID は推測不可、session_id / order_number を知る本人のみ取得可能
  */
 import { handleCors } from '../_shared/cors.ts'
 import { errorResponse, successResponse } from '../_shared/errors.ts'
@@ -74,6 +81,7 @@ Deno.serve(async (req: Request) => {
 
     // ───── 公開用レスポンス組み立て ─────
     const response: Record<string, unknown> = {
+      id: order.id,
       order_number: order.order_number,
       payment_method: order.payment_method,
       payment_status: order.payment_status,
