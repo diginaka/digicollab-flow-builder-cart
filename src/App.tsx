@@ -100,19 +100,29 @@ export default function App() {
     )
   }
 
+  // SE-3 PR-3 (宿題C): 業務管理クラスタ（/ ダッシュボード, /orders, /reports）は
+  // flags.showBusinessAdmin で一括ゲート。既定 false（ホームへ移管済）では残りの主要ページへ
+  // 退避させ、直 URL でも重複窓口に到達させない（受け入れ #5）。ページ実体は残すので可逆。
+  const businessHome = flags.showBusinessAdmin
+  const homeFallback = flags.canRegisterProducts
+    ? '/products'
+    : flags.canAccessSettings
+      ? '/settings/payment'
+      : '/products'
+
   return (
     <BrandingContext.Provider value={branding}>
       <BrowserRouter>
         <Routes>
           <Route element={<Layout user={user} flags={flags} isReseller={isReseller} />}>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={businessHome ? <Dashboard /> : <Navigate to={homeFallback} replace />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products/new" element={<ProductForm />} />
             <Route path="/products/:id/edit" element={<ProductForm />} />
-            <Route path="/orders" element={<Orders />} />
+            <Route path="/orders" element={businessHome ? <Orders /> : <Navigate to={homeFallback} replace />} />
             <Route path="/coupons" element={<Coupons />} />
             <Route path="/upsells" element={<Upsells />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/reports" element={businessHome ? <Reports /> : <Navigate to={homeFallback} replace />} />
             <Route path="/settings/payment" element={<PaymentSettings />} />
             <Route path="/settings/general" element={<GeneralSettings />} />
             <Route path="/settings/branding" element={<BrandingSettings />} />

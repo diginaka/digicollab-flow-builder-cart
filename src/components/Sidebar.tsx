@@ -27,13 +27,16 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
   const branding = useBranding()
   const location = useLocation()
 
+  // SE-3 PR-3 (宿題C): 業務管理クラスタ（ダッシュボード / 注文 / 売上レポート）は
+  // フロービルダー本体のホーム『成果』配下へ移管済。flags.showBusinessAdmin で一括ゲート
+  // （既定 false ＝ホームへ一本化・重複窓口ゼロ）。
   const navItems: NavItem[] = [
-    { to: '/', label: 'ダッシュボード', icon: <LayoutDashboard className="w-5 h-5" />, show: true },
+    { to: '/', label: 'ダッシュボード', icon: <LayoutDashboard className="w-5 h-5" />, show: flags.showBusinessAdmin },
     { to: '/products', label: '商品', icon: <Package className="w-5 h-5" />, show: flags.canRegisterProducts },
-    { to: '/orders', label: '注文', icon: <ShoppingBag className="w-5 h-5" />, show: true },
+    { to: '/orders', label: '注文', icon: <ShoppingBag className="w-5 h-5" />, show: flags.showBusinessAdmin },
     { to: '/coupons', label: 'クーポン', icon: <Ticket className="w-5 h-5" />, show: flags.canManageCoupons },
     { to: '/upsells', label: 'アップセル', icon: <TrendingUp className="w-5 h-5" />, show: flags.canManageUpsells },
-    { to: '/reports', label: '売上レポート', icon: <BarChart3 className="w-5 h-5" />, show: true },
+    { to: '/reports', label: '売上レポート', icon: <BarChart3 className="w-5 h-5" />, show: flags.showBusinessAdmin },
   ]
 
   // signOut がハブへリダイレクトするので、ここでは呼ぶだけ
