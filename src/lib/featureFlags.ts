@@ -10,6 +10,13 @@ export interface FeatureFlags {
   canManageUpsells: boolean
   canExportCSV: boolean
   canAccessSettings: boolean
+  /**
+   * 業務管理クラスタ（ダッシュボード / 注文 / 売上レポート）を cart 標準アドミンに表示するか。
+   * SE-3 PR-3（宿題C, 2026-06-05）でこれらをフロービルダー本体のホーム『成果』配下へ移管したため、
+   * 既定では false（窓口をホームへ一本化＝重複窓口ゼロ）。standalone ビルドは残しており、
+   * true に戻せば従来どおり cart 側でも表示・到達できる（可逆）。
+   */
+  showBusinessAdmin: boolean
 }
 
 export const DEFAULT_ALL_ENABLED: FeatureFlags = {
@@ -18,6 +25,8 @@ export const DEFAULT_ALL_ENABLED: FeatureFlags = {
   canManageUpsells: true,
   canExportCSV: true,
   canAccessSettings: true,
+  // SE-3 PR-3: 業務管理はホームへ移管済。cart 側では既定で隠す（再表示は true に変更）。
+  showBusinessAdmin: false,
 }
 
 /**
