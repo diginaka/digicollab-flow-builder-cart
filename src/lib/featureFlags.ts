@@ -17,6 +17,13 @@ export interface FeatureFlags {
    * true に戻せば従来どおり cart 側でも表示・到達できる（可逆）。
    */
   showBusinessAdmin: boolean
+  /**
+   * 決済設定（/settings/payment）を cart 標準アドミンに表示するか。
+   * SE-3 PR-4（宿題D, 2026-06-05）でフロービルダー本体の /integrations「決済接続」へ
+   * 移管したため、既定では false（窓口を /integrations へ一本化＝重複窓口ゼロ）。
+   * ページ実体は残しており、true に戻せば従来どおり cart 側でも表示・到達できる（可逆）。
+   */
+  showPaymentSettings: boolean
 }
 
 export const DEFAULT_ALL_ENABLED: FeatureFlags = {
@@ -27,6 +34,8 @@ export const DEFAULT_ALL_ENABLED: FeatureFlags = {
   canAccessSettings: true,
   // SE-3 PR-3: 業務管理はホームへ移管済。cart 側では既定で隠す（再表示は true に変更）。
   showBusinessAdmin: false,
+  // SE-3 PR-4: 決済設定は /integrations へ移管済。cart 側では既定で隠す（再表示は true に変更）。
+  showPaymentSettings: false,
 }
 
 /**
