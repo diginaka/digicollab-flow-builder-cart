@@ -103,11 +103,14 @@ export default function App() {
   // SE-3 PR-3 (宿題C): 業務管理クラスタ（/ ダッシュボード, /orders, /reports）は
   // flags.showBusinessAdmin で一括ゲート。既定 false（ホームへ移管済）では残りの主要ページへ
   // 退避させ、直 URL でも重複窓口に到達させない（受け入れ #5）。ページ実体は残すので可逆。
+  // SE-3 PR-4 (宿題D): 決済設定（/settings/payment）も flags.showPaymentSettings で同様にゲート。
+  // /integrations へ移管した重複窓口を隠す（既定 false・可逆）。homeFallback は隠した
+  // /settings/payment を指さないよう /settings/general（常時表示）へ退避させる。
   const businessHome = flags.showBusinessAdmin
   const homeFallback = flags.canRegisterProducts
     ? '/products'
     : flags.canAccessSettings
-      ? '/settings/payment'
+      ? '/settings/general'
       : '/products'
 
   return (
@@ -123,7 +126,7 @@ export default function App() {
             <Route path="/coupons" element={<Coupons />} />
             <Route path="/upsells" element={<Upsells />} />
             <Route path="/reports" element={businessHome ? <Reports /> : <Navigate to={homeFallback} replace />} />
-            <Route path="/settings/payment" element={<PaymentSettings />} />
+            <Route path="/settings/payment" element={flags.showPaymentSettings ? <PaymentSettings /> : <Navigate to={homeFallback} replace />} />
             <Route path="/settings/general" element={<GeneralSettings />} />
             <Route path="/settings/branding" element={<BrandingSettings />} />
             <Route path="*" element={<Navigate to="/" replace />} />

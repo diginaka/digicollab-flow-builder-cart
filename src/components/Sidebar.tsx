@@ -86,18 +86,22 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
             <p className="px-3 pb-2 text-xs text-gray-400 font-semibold uppercase tracking-wider">
               設定
             </p>
-            <NavLink
-              to="/settings/payment"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-100'
-                }`
-              }
-            >
-              <Settings className="w-5 h-5" />
-              <span>決済設定</span>
-            </NavLink>
+            {/* SE-3 PR-4 (宿題D): 決済設定は /integrations へ移管。showPaymentSettings
+                （既定 false）で隠す（可逆）。一般設定 / ブランディングは cart 残置。 */}
+            {flags.showPaymentSettings && (
+              <NavLink
+                to="/settings/payment"
+                onClick={() => setMobileOpen(false)}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive ? 'bg-brand-50 text-brand-700' : 'text-gray-600 hover:bg-gray-100'
+                  }`
+                }
+              >
+                <Settings className="w-5 h-5" />
+                <span>決済設定</span>
+              </NavLink>
+            )}
             <NavLink
               to="/settings/general"
               onClick={() => setMobileOpen(false)}
