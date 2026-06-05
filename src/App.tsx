@@ -128,7 +128,9 @@ export default function App() {
             <Route path="/reports" element={businessHome ? <Reports /> : <Navigate to={homeFallback} replace />} />
             <Route path="/settings/payment" element={flags.showPaymentSettings ? <PaymentSettings /> : <Navigate to={homeFallback} replace />} />
             <Route path="/settings/general" element={<GeneralSettings />} />
-            <Route path="/settings/branding" element={<BrandingSettings />} />
+            {/* SE-3 カート2ペイン PR-D: ブランディングは flow-builder /admin へ一本化（既定 false・可逆）。
+                隠したルートへの直 URL は重複窓口に到達させず homeFallback へ退避。 */}
+            <Route path="/settings/branding" element={flags.showBrandingSettings ? <BrandingSettings /> : <Navigate to={homeFallback} replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
