@@ -24,6 +24,16 @@ export interface FeatureFlags {
    * ページ実体は残しており、true に戻せば従来どおり cart 側でも表示・到達できる（可逆）。
    */
   showPaymentSettings: boolean
+  /**
+   * ブランディング設定（/settings/branding）を cart 標準アドミンに表示するか。
+   * SE-3 カート2ペイン PR-D（2026-06-05）でフロービルダー本体 /admin「ブランド設定」
+   * （Partner 自身が resellers.settings.branding = logo/color/from_name を編集可・
+   * RLS reseller_update_own・既稼働）へ一本化したため、既定では false（重複窓口ゼロ）。
+   * ページ実体・保存ロジックは残しており、true に戻せば従来どおり cart 側でも表示・到達
+   * できる（可逆）。go-live 前提条件: /admin ブランド設定が稼働＋検証済を確認の上で隠す。
+   * subdomain 等の「一般設定」は flow-builder 側に Partner 編集 UI が無いため cart に残置。
+   */
+  showBrandingSettings: boolean
 }
 
 export const DEFAULT_ALL_ENABLED: FeatureFlags = {
@@ -36,6 +46,9 @@ export const DEFAULT_ALL_ENABLED: FeatureFlags = {
   showBusinessAdmin: false,
   // SE-3 PR-4: 決済設定は /integrations へ移管済。cart 側では既定で隠す（再表示は true に変更）。
   showPaymentSettings: false,
+  // SE-3 カート2ペイン PR-D: ブランディングは flow-builder /admin ブランド設定へ一本化済。
+  //   cart 側では既定で隠す（再表示は true に変更＝可逆）。
+  showBrandingSettings: false,
 }
 
 /**

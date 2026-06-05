@@ -87,7 +87,9 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
               設定
             </p>
             {/* SE-3 PR-4 (宿題D): 決済設定は /integrations へ移管。showPaymentSettings
-                （既定 false）で隠す（可逆）。一般設定 / ブランディングは cart 残置。 */}
+                （既定 false）で隠す（可逆）。
+                SE-3 カート2ペイン PR-D: ブランディングは flow-builder /admin ブランド設定へ
+                移管。showBrandingSettings（既定 false）で隠す（可逆）。一般設定は cart 残置。 */}
             {flags.showPaymentSettings && (
               <NavLink
                 to="/settings/payment"
@@ -114,7 +116,7 @@ export function Sidebar({ user, flags, isReseller }: SidebarProps) {
               <Settings className="w-5 h-5" />
               <span>一般設定</span>
             </NavLink>
-            {isReseller && (
+            {flags.showBrandingSettings && isReseller && (
               <NavLink
                 to="/settings/branding"
                 onClick={() => setMobileOpen(false)}
